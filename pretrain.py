@@ -53,7 +53,7 @@ def pretrain(dataset):
         optimizer.step()
 
         with torch.no_grad():
-            _, z = model(x, adj, M)
+            _,_, z = model(x, adj, M)
             kmeans = KMeans(n_clusters=args.n_clusters, n_init=20).fit(
                 z.data.cpu().numpy()
             )
