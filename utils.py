@@ -6,7 +6,7 @@ from torch_geometric.datasets import Planetoid
 
 # 从指定路径加指定名称的数据集
 def get_dataset(dataset):
-    datasets = Planetoid('./dataset', dataset)
+    datasets = Planetoid('./DAEGC/dataset', dataset)
     return datasets
 
 # 对数据进行预处理
