@@ -16,6 +16,7 @@ import utils
 from model import GAT #导入model中的GAT类
 from evaluation import eva
 
+# LHM
 
 class DAEGC(nn.Module):
 # DAEGC模型初始化
