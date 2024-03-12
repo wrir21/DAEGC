@@ -72,7 +72,7 @@ def trainer(dataset):
     data = torch.Tensor(dataset.x).to(device)
     y = dataset.y.cpu().numpy()
     with torch.no_grad():
-        _, z = model.gat(data, adj, M)
+        _, _,z = model.gat(data, adj, M)
 
     kmeans = KMeans(n_clusters=args.n_clusters, n_init=20)
     y_pred = kmeans.fit_predict(z.data.cpu().numpy())
