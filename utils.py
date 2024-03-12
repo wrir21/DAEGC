@@ -4,12 +4,11 @@ from sklearn.preprocessing import normalize
 
 from torch_geometric.datasets import Planetoid
 
-# 从指定路径加指定名称的数据集
+
 def get_dataset(dataset):
     datasets = Planetoid('./dataset', dataset)
     return datasets
 
-# 对数据进行预处理
 def data_preprocessing(dataset):
     dataset.adj = torch.sparse_coo_tensor(
         dataset.edge_index, torch.ones(dataset.edge_index.shape[1]), torch.Size([dataset.x.shape[0], dataset.x.shape[0]])
@@ -22,7 +21,6 @@ def data_preprocessing(dataset):
 
     return dataset
 
-# 接受一个矩阵函数，根据该矩阵函数计算转移矩阵M
 def get_M(adj):
     adj_numpy = adj.cpu().numpy()
     # t_order
