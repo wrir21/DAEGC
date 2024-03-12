@@ -50,18 +50,18 @@ class DAEGC(nn.Module):
         return q
     
 
-    # 基于给定的数据点与聚类中心的相似度矩阵 q，计算每个数据点在每个聚类中的权重
-    def target_distribution(q):
-        weight = q**2 / q.sum(0)
-        return (weight.t() / weight.sum(1)).t()
+# 基于给定的数据点与聚类中心的相似度矩阵 q，计算每个数据点在每个聚类中的权重
+def target_distribution(q):
+    weight = q**2 / q.sum(0)
+    return (weight.t() / weight.sum(1)).t()
 
 # 训练模型
     # 创建一个 DAEGC 模型的实例，定义了优化器，使用基于梯度下降的优化算法的Adam 优化器optimizer
-    def trainer(dataset):
-        model = DAEGC(num_features=args.input_dim, hidden_size=args.hidden_size,
-                    embedding_size=args.embedding_size, alpha=args.alpha, num_clusters=args.n_clusters).to(device)
-        print(model)
-        optimizer = Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay) 
+def trainer(dataset):
+    model = DAEGC(num_features=args.input_dim, hidden_size=args.hidden_size,
+                embedding_size=args.embedding_size, alpha=args.alpha, num_clusters=args.n_clusters).to(device)
+    print(model)
+    optimizer = Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay) 
 
 
     dataset = utils.data_preprocessing(dataset)
@@ -78,7 +78,7 @@ class DAEGC(nn.Module):
     y_pred = kmeans.fit_predict(z.data.cpu().numpy())
     model.cluster_layer.data = torch.tensor(kmeans.cluster_centers_).to(device)
     eva(y, y_pred, 'pretrain')
-    
+
 
     for epoch in range(args.max_epoch):
         model.train()
