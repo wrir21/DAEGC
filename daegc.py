@@ -90,7 +90,7 @@ def trainer(dataset):
             eva(y, q, epoch)
 
         # A_pred, z, q = model(data, adj, M)
-        A1_pred, A2_pred, z = model(data, adj, M)
+        A1_pred, A2_pred, z,q= model(data, adj, M)
         p = target_distribution(Q.detach())
 
         kl_loss = F.kl_div(q.log(), p, reduction='batchmean')
