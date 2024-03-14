@@ -75,7 +75,11 @@ def trainer(dataset):
 
     for epoch in range(args.max_epoch):
         model.train()
+        
+        A_pred, z, Q = model(data, adj, M)
+        q = Q.detach().data.cpu().numpy().argmax(1)  # Q
         acc, nmi, ari, f1 = eva(y, q, epoch)
+
         if acc >= args.acc:
             # update_interval
             A_pred, z, Q = model(data, adj, M)
