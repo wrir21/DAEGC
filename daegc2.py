@@ -13,7 +13,7 @@ from torch.optim import Adam
 from torch_geometric.datasets import Planetoid
 
 import utils
-from model import GAT #导入model中的GAT类
+from model2 import GAT #导入model中的GAT类
 from evaluation import eva
 
 
@@ -82,12 +82,12 @@ def trainer(dataset):
         # 按照原文逻辑更新P
         if epoch % args.update_interval == 0:
                 # update_interval
-                A_pred, z, Q = model(data, adj, M)
+                A1_pred,A2_pred, z, Q = model(data, adj, M)
                 
                 q = Q.detach().data.cpu().numpy().argmax(1)  # Q
                 eva(y, q, epoch)
 
-        A_pred, z, q = model(data, adj, M)
+        A1_pred,A2_pred ,z, q = model(data, adj, M)
         p = target_distribution(Q.detach())
         # 计算重构损失 Lr    
         re_loss = F.binary_cross_entropy(A2_pred.view(-1), adj_label.view(-1))

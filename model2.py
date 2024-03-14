@@ -31,7 +31,7 @@ class GAT(nn.Module):
         # 使用解码器计算第一层GAT的重构邻接矩阵 
         A1_pred = self.dot_product_decode(h1)   
         # 使用解码器计算重构邻接矩阵
-        A2_pred = self.dot_product_decode(h2)
+        A2_pred = self.dot_product_decode(z)  # 使用A2_pred = self.dot_product_decode(h2)效果不好
         return A1_pred,A2_pred, z
     
     #解码器
