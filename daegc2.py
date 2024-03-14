@@ -13,24 +13,21 @@ from torch.optim import Adam
 from torch_geometric.datasets import Planetoid
 
 import utils
-from model2 import GAT #导入model中的GAT类
+from model import GAT #导入model中的GAT类
 from evaluation import eva
 
-# LHM
 
 class DAEGC(nn.Module):
 # DAEGC模型初始化
 
     # 定义聚类的数量、聚类中心的权重
+    # 创建一个GAT模型实例gat，设置gat的属性，并且从指定路径（pkl文件）加载预训练的参数到gat中
     def __init__(self, num_features, hidden_size, embedding_size, alpha, num_clusters, v=1):
         super(DAEGC, self).__init__()
         self.num_clusters = num_clusters
         self.v = v
-    
-    # 创建一个GAT模型实例gat，设置gat的属性，并且从指定路径（pkl文件）加载预训练的参数到gat中
         self.gat = GAT(num_features, hidden_size, embedding_size, alpha)
         self.gat.load_state_dict(torch.load(args.pretrain_path, map_location='cpu'))
-       
         self.cluster_layer = Parameter(torch.Tensor(num_clusters, embedding_size))
         torch.nn.init.xavier_normal_(self.cluster_layer.data)
 
@@ -56,7 +53,7 @@ def target_distribution(q):
     return (weight.t() / weight.sum(1)).t()
 
 # 训练模型
-    # 创建一个 DAEGC 模型的实例，定义了优化器，使用基于梯度下降的优化算法的Adam 优化器optimizer
+# 创建一个 DAEGC 模型的实例，定义了优化器，使用基于梯度下降的优化算法的Adam 优化器optimizer
 def trainer(dataset):
     model = DAEGC(num_features=args.input_dim, hidden_size=args.hidden_size,
                 embedding_size=args.embedding_size, alpha=args.alpha, num_clusters=args.n_clusters).to(device)
@@ -82,28 +79,26 @@ def trainer(dataset):
 
     for epoch in range(args.max_epoch):
         model.train()
-        if epoch % args.update_interval == 0:
-            # A_pred, z, Q = model(data, adj, M)
-            A1_pred, A2_pred, z, Q = model(data, adj, M)
+        
+        A1_pred, A2_pred,z,q= model(data, adj, M)
 
+        # 每到聚类周期时，只有评估分数优于之前时，才更新分布Q
+        if epoch % args.update_interval == 0:
             q = Q.detach().data.cpu().numpy().argmax(1)  
+            p = target_distribution(Q.detach())
             eva(y, q, epoch)
 
-        # A_pred, z, q = model(data, adj, M)
-        A1_pred, A2_pred, z,q= model(data, adj, M)
-        p = target_distribution(Q.detach())
+            kl_loss = F.kl_div(q.log(), p, reduction='batchmean')
+            # re_loss = F.binary_cross_entropy(A_pred.view(-1), adj_label.view(-1))
+            re_loss = F.binary_cross_entropy(A1_pred.view(-1), adj_label.view(-1))
+            # 计算A1_pred和A2_pred的绝对差并添加到原始损失中
+            abs_diff_loss = torch.sum(torch.abs(A1_pred - A2_pred))
+            # loss = 10 * kl_loss + re_loss
+            loss = 10 * kl_loss + re_loss + 0.01 * abs_diff_loss
 
-        kl_loss = F.kl_div(q.log(), p, reduction='batchmean')
-        # re_loss = F.binary_cross_entropy(A_pred.view(-1), adj_label.view(-1))
-        re_loss = F.binary_cross_entropy(A1_pred.view(-1), adj_label.view(-1))
-        # 计算A1_pred和A2_pred的绝对差并添加到原始损失中
-        abs_diff_loss = torch.sum(torch.abs(A1_pred - A2_pred))
-        # loss = 10 * kl_loss + re_loss
-        loss = 10 * kl_loss + re_loss + 0.01 * abs_diff_loss
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
 
 
