@@ -14,11 +14,8 @@ import utils
 from model import GAT
 from evaluation import eva
 
-# 定义预训练函数：
 
-# 创建一个GAT模型，并将其移到GPU/CPU上
 def pretrain(dataset):
-    # GAT模型：输入特征维度、隐藏层大小、嵌入维度、激活函数LeakyReLU的参数
     model = GAT(
         num_features=args.input_dim,
         hidden_size=args.hidden_size,
@@ -26,34 +23,28 @@ def pretrain(dataset):
         alpha=args.alpha,
     ).to(device)
     print(model)
-    # 定义优化器Adam：被优化的参数p、学习率lr、权重衰减参数weight_dency
     optimizer = Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
-
-
-#数据预处理
-    #数据集预处理，得到邻接矩阵 adj 和邻接矩阵标签、计算度矩阵M
-    #将特征转换为Tensor 对象、将标签从 PyTorch Tensor 对象转换为 NumPy 数组
-    dataset = utils.data_preprocessing(dataset) 
+    # data process
+    dataset = utils.data_preprocessing(dataset)
     adj = dataset.adj.to(device)
     adj_label = dataset.adj_label.to(device)
     M = utils.get_M(adj).to(device)
+
+    # data and label
     x = torch.Tensor(dataset.x).to(device)
     y = dataset.y.cpu().numpy()
 
-
-
-#    模型在每个 epoch 中进行了一次完整的前向传播、损失计算、反向传播和参数更新的训练过程。
     for epoch in range(args.max_epoch):
         model.train()
-        A1_pred,A2_pred, z = model(x, adj, M)
-        loss = F.binary_cross_entropy(A2_pred.view(-1), adj_label.view(-1))
+        A_pred, z = model(x, adj, M)
+        loss = F.binary_cross_entropy(A_pred.view(-1), adj_label.view(-1))
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
         with torch.no_grad():
-            _,_, z = model(x, adj, M)
+            _, z = model(x, adj, M)
             kmeans = KMeans(n_clusters=args.n_clusters, n_init=20).fit(
                 z.data.cpu().numpy()
             )
