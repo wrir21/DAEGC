@@ -80,25 +80,26 @@ def trainer(dataset):
     for epoch in range(args.max_epoch):
         model.train()
         
-        A1_pred, A2_pred,z,q= model(data, adj, M)
-
-        # 每到聚类周期时，只有评估分数优于之前时，才更新分布Q
         if epoch % args.update_interval == 0:
-            q = Q.detach().data.cpu().numpy().argmax(1)  
+            # A_pred, z, Q = model(data, adj, M)
+            A1_pred, A2_pred, z, Q = model(data, adj, M)
+            q = Q.detach().data.cpu().numpy().argmax(1) 
             p = target_distribution(Q.detach())
             eva(y, q, epoch)
 
-            kl_loss = F.kl_div(q.log(), p, reduction='batchmean')
-            # re_loss = F.binary_cross_entropy(A_pred.view(-1), adj_label.view(-1))
-            re_loss = F.binary_cross_entropy(A1_pred.view(-1), adj_label.view(-1))
-            # 计算A1_pred和A2_pred的绝对差并添加到原始损失中
-            abs_diff_loss = torch.sum(torch.abs(A1_pred - A2_pred))
-            # loss = 10 * kl_loss + re_loss
-            loss = 10 * kl_loss + re_loss + 0.01 * abs_diff_loss
+        # A_pred, z, q = model(data, adj, M)
+        A1_pred, A2_pred, z,q= model(data, adj, M)
+        kl_loss = F.kl_div(q.log(), p, reduction='batchmean')
+        # re_loss = F.binary_cross_entropy(A_pred.view(-1), adj_label.view(-1))
+        re_loss = F.binary_cross_entropy(A1_pred.view(-1), adj_label.view(-1))
+        # 计算A1_pred和A2_pred的绝对差并添加到原始损失中
+        abs_diff_loss = torch.sum(torch.abs(A1_pred - A2_pred))
+        # loss = 10 * kl_loss + re_loss
+        loss = 10 * kl_loss + re_loss + 0.01 * abs_diff_loss
 
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
 
 
