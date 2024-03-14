@@ -75,11 +75,13 @@ def trainer(dataset):
 
     for epoch in range(args.max_epoch):
         model.train()
-        if epoch % args.update_interval == 0:
+        acc, nmi, ari, f1 = eva(y, q, epoch)
+        if acc >= args.acc:
             # update_interval
             A_pred, z, Q = model(data, adj, M)
             q = Q.detach().data.cpu().numpy().argmax(1)  # Q
-            # eva(y, q, epoch)
+            eva(y, q, epoch)
+            
 
         A_pred, z, q = model(data, adj, M)
         p = target_distribution(Q.detach())
