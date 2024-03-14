@@ -96,7 +96,7 @@ def trainer(dataset):
         abs_diff_loss = torch.sum(torch.abs(A1_pred - A2_pred))
         loss = 10 * kl_loss + re_loss
         # 计算总损失
-        loss = loss + 0.01 * abs_diff_loss
+        loss = loss + 0.1 * abs_diff_loss
 
         optimizer.zero_grad()
         loss.backward()
