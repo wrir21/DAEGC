@@ -89,6 +89,7 @@ def trainer(dataset):
 
         A1_pred,A2_pred ,z, q = model(data, adj, M)
         p = target_distribution(Q.detach())
+        kl_loss = F.kl_div(q.log(), p, reduction='batchmean')
         # 计算重构损失 Lr    
         re_loss = F.binary_cross_entropy(A2_pred.view(-1), adj_label.view(-1))
         # 计算A1_pred和A2_pred的绝对差并添加到原始损失中
