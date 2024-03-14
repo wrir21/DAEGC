@@ -79,16 +79,15 @@ def trainer(dataset):
 
     for epoch in range(args.max_epoch):
         model.train()
-        
+        A1_pred, A2_pred, z,q= model(data, adj, M)
+        #每隔5轮训练次数，才更新P分布
         if epoch % args.update_interval == 0:
-            # A_pred, z, Q = model(data, adj, M)
             A1_pred, A2_pred, z, Q = model(data, adj, M)
             q = Q.detach().data.cpu().numpy().argmax(1) 
             p = target_distribution(Q.detach())
-            eva(y, q, epoch)
+            # eva(y, q, epoch)
 
-        # A_pred, z, q = model(data, adj, M)
-        A1_pred, A2_pred, z,q= model(data, adj, M)
+        
         kl_loss = F.kl_div(q.log(), p, reduction='batchmean')
         # re_loss = F.binary_cross_entropy(A_pred.view(-1), adj_label.view(-1))
         re_loss = F.binary_cross_entropy(A1_pred.view(-1), adj_label.view(-1))
