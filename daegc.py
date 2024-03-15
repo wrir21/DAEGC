@@ -16,7 +16,7 @@ import utils
 from model import GAT
 from evaluation import eva
 
-
+# 自定义的神经网络都需要继承pythorch的nn.Moudle
 class DAEGC(nn.Module):
     def __init__(self, num_features, hidden_size, embedding_size, alpha, num_clusters, v=1):
         super(DAEGC, self).__init__()
@@ -25,25 +25,28 @@ class DAEGC(nn.Module):
 
         # get pretrain model
         self.gat = GAT(num_features, hidden_size, embedding_size, alpha)
+        # 从args.pretrain_path加载权重和参数到CPU内存中，同时也加载到gat模型中
         self.gat.load_state_dict(torch.load(args.pretrain_path, map_location='cpu'))
 
         # cluster layer
-        self.cluster_layer = Parameter(torch.Tensor(num_clusters, embedding_size))
+        # 存储聚类中心的层（聚类中心嵌入），后续会进行根据训练更新
+        self.cluster_layer = Parameter(torch.Tensor(num_clusters, embedding_size)) 
+        # 初始化使数据变化保持稳定，并允许修改聚类中心层数据
         torch.nn.init.xavier_normal_(self.cluster_layer.data)
 
 
     def forward(self, x, adj, M):
-        A_pred, z = self.gat(x, adj, M)
-        q = self.get_Q(z)
+        A_pred, z = self.gat(x, adj, M) # （隐式）调用gat模型的forward方法
+        q = self.get_Q(z) #调用本模型（daegc）的get_Q方法
 
         return A_pred, z, q
-
+# Q分布计算
     def get_Q(self, z):
         q = 1.0 / (1.0 + torch.sum(torch.pow(z.unsqueeze(1) - self.cluster_layer, 2), 2) / self.v)
         q = q.pow((self.v + 1.0) / 2.0)
         q = (q.t() / torch.sum(q, 1)).t()
         return q
-
+# P分布计算
 def target_distribution(q):
     weight = q**2 / q.sum(0)
     return (weight.t() / weight.sum(1)).t()
@@ -69,8 +72,10 @@ def trainer(dataset):
 
     # get kmeans and pretrain cluster result
     kmeans = KMeans(n_clusters=args.n_clusters, n_init=20)
+    # 执行了K-means聚类算法，并将结果存储在 y_pred 
     y_pred = kmeans.fit_predict(z.data.cpu().numpy())
-    model.cluster_layer.data = torch.tensor(kmeans.cluster_centers_).to(device)
+    # 将K-means算法找到的簇中心点赋值给深度学习模型中的 cluster_layer
+    model.cluster_layer.data = torch.tensor(kmeans.cluster_centers_).to(device) #kmeans.cluster_centers_：K-means算法找到的簇中心点
     eva(y, y_pred, 'pretrain')
 
     for epoch in range(args.max_epoch):
@@ -78,13 +83,15 @@ def trainer(dataset):
         if epoch % args.update_interval == 0:
             # update_interval
             A_pred, z, Q = model(data, adj, M)
-            
-            q = Q.detach().data.cpu().numpy().argmax(1)  # Q
+            # 从PyTorch tensor Q 中获取每一行最大值的索引，并将其作为NumPy数组返回
+            # Q是模型输出的类别概率分布，q是模型预测的类别标签
+            q = Q.detach().data.cpu().numpy().argmax(1)  
             eva(y, q, epoch)
 
         A_pred, z, q = model(data, adj, M)
-        p = target_distribution(Q.detach())
-
+        p = target_distribution(Q.detach()) #依据Q.detach产生的条件，P更新的条件仍然成立
+        
+        # 让每轮训练的结果与每5轮更新一次的P，计算kl散度
         kl_loss = F.kl_div(q.log(), p, reduction='batchmean')
         re_loss = F.binary_cross_entropy(A_pred.view(-1), adj_label.view(-1))
 
