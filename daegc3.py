@@ -80,7 +80,9 @@ def trainer(dataset):
 
     for epoch in range(args.max_epoch):
         model.train()
-
+        A_pred, z, q = model(data, adj, M)
+        acc_new , nmi_new , ari_new , f1_new = eva(
+            y,q.detach(),epoch)
         if acc_new >= acc:    
             A_pred, z, Q = model(data, adj, M)
             # 从PyTorch tensor Q 中获取每一行最大值的索引，并将其作为NumPy数组返回
@@ -89,9 +91,7 @@ def trainer(dataset):
             p = target_distribution(Q.detach()) #依据Q.detach产生的条件，P更新的条件
             eva(y,q,epoch)
         
-        A_pred, z, q = model(data, adj, M)
-        acc_new , nmi_new , ari_new , f1_new = eva(
-            y,q.detach(),epoch)
+       
 
         # 让每轮训练的结果与每5轮更新一次的P，计算kl散度
         kl_loss = F.kl_div(q.log(), p, reduction='batchmean')
