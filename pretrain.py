@@ -23,6 +23,7 @@ def pretrain(dataset):
         alpha=args.alpha,
     ).to(device)
     print(model)
+    # Adam优化器，用于训练模型参数
     optimizer = Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
     # data process
@@ -42,7 +43,7 @@ def pretrain(dataset):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
+        # 梯度清零过程中进行k-means聚类
         with torch.no_grad():
             _, z = model(x, adj, M)
             kmeans = KMeans(n_clusters=args.n_clusters, n_init=20).fit(
@@ -56,6 +57,7 @@ def pretrain(dataset):
 
 
 if __name__ == "__main__":
+    # 从命令行接收参数并且解析为args对象的属性值
     parser = argparse.ArgumentParser(
         description="train", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
@@ -73,7 +75,7 @@ if __name__ == "__main__":
     args.cuda = torch.cuda.is_available()
     print("use cuda: {}".format(args.cuda))
     device = torch.device("cuda" if args.cuda else "cpu")
-
+    # 获取数据集
     datasets = utils.get_dataset(args.name)
     dataset = datasets[0]
 
