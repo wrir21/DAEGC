@@ -91,7 +91,7 @@ def trainer(dataset):
         
         A_pred, z, q = model(data, adj, M)
         acc_new , nmi_new , ari_new , f1_new = eva(
-            y,q.detach().data.cpu().numpy().argmax(1),epoch)
+            y,q.detach(),epoch)
 
         # 让每轮训练的结果与每5轮更新一次的P，计算kl散度
         kl_loss = F.kl_div(q.log(), p, reduction='batchmean')
