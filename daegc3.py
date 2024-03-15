@@ -76,21 +76,22 @@ def trainer(dataset):
     y_pred = kmeans.fit_predict(z.data.cpu().numpy())
     # 将K-means算法找到的簇中心点赋值给深度学习模型中的 cluster_layer
     model.cluster_layer.data = torch.tensor(kmeans.cluster_centers_).to(device) #kmeans.cluster_centers_：K-means算法找到的簇中心点
-    args.acc, args.nmi, args.ari, args.f1 = eva(y, y_pred, 'pretrain')
+    acc, nmi, ari, f1 = eva(y, y_pred, 'pretrain')
 
     for epoch in range(args.max_epoch):
         model.train()
-
-        if acc >= args.acc:    
+        A_pred, z, q = model(data, adj, M)
+        q_new = q.detach().data.cpu().numpy().argmax(1) 
+        acc_new , nmi_new , ari_new , f1_new = eva(y,q_new,epoch)
+        if acc_new >= acc:    
             A_pred, z, Q = model(data, adj, M)
             # 从PyTorch tensor Q 中获取每一行最大值的索引，并将其作为NumPy数组返回
             # Q是模型输出的类别概率分布，q是模型预测的类别标签
             q = Q.detach().data.cpu().numpy().argmax(1)  
-            p = target_distribution(Q.detach()) #依据Q.detach产生的条件，P更新的条件仍然成立
+            p = target_distribution(Q.detach()) #依据Q.detach产生的条件，P更新的条件
+            eva(y,q,epoch)
+           
 
-        A_pred, z, q = model(data, adj, M)
-        acc , nmi , ari , f1 = eva(y,q.detach,epoch)
-        
         # 让每轮训练的结果与每5轮更新一次的P，计算kl散度
         kl_loss = F.kl_div(q.log(), p, reduction='batchmean')
         re_loss = F.binary_cross_entropy(A_pred.view(-1), adj_label.view(-1))
