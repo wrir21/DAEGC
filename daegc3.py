@@ -80,8 +80,8 @@ def trainer(dataset):
 
     for epoch in range(args.max_epoch):
         model.train()
-        A_pred, z, q = model(data, adj, M)
-        q_new = q.detach().data.cpu().numpy().argmax(1) 
+        A_pred, z, q_nomal = model(data, adj, M)
+        q_new = q_nomal.detach().data.cpu().numpy().argmax(1) 
         acc_new , nmi_new , ari_new , f1_new = eva(y,q_new,epoch)
 
         if acc_new >= acc:    
@@ -93,7 +93,7 @@ def trainer(dataset):
             eva(y,q,epoch)
 
         #计算kl散度
-        kl_loss = F.kl_div(q.log(), p, reduction='batchmean')
+        kl_loss = F.kl_div(q_nomal.log(), p, reduction='batchmean')
         re_loss = F.binary_cross_entropy(A_pred.view(-1), adj_label.view(-1))
 
         loss = 10 * kl_loss + re_loss
