@@ -10,14 +10,17 @@ from sklearn import metrics
 # similar to https://github.com/karenlatong/AGC-master/blob/master/metrics.py
 # cluster_acc 函数用于计算聚类任务的准确率（accuracy）和宏平均 F1 分数
 def cluster_acc(y_true, y_pred):
-    y_true = y_true - np.min(y_true)
-
+    # 调整y_true的最小值，y_true从0开始
+    y_true = y_true - np.min(y_true) 
+    # 计算y_true和y_pred中的类别数量
+    # 转换为set，除去重复的值  
     l1 = list(set(y_true))
     numclass1 = len(l1)
 
     l2 = list(set(y_pred))
     numclass2 = len(l2)
 
+    # 处理y_true和y_pred中的类别数量不匹配的问题
     ind = 0
     if numclass1 != numclass2:
         for i in l1:
