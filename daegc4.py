@@ -76,23 +76,25 @@ def trainer(dataset):
     y_pred = kmeans.fit_predict(z.data.cpu().numpy())
     # 将K-means算法找到的簇中心点赋值给深度学习模型中的 cluster_layer
     model.cluster_layer.data = torch.tensor(kmeans.cluster_centers_).to(device) #kmeans.cluster_centers_：K-means算法找到的簇中心点
-    acc, nmi, ari, f1 = eva(y, y_pred, 'pretrain')
+    eva(y, y_pred, 'pretrain')
+
+    prev_acc = 0  # 初始化前一个性能评估值  
 
     for epoch in range(args.max_epoch):
         model.train()
-        A_pred, z, q_nomal = model(data, adj, M)
 
-        if acc_new >= acc:    
-            acc = acc_new
+        if epoch % args.update_interval == 0:
             A_pred, z, Q = model(data, adj, M)
-            # 从PyTorch tensor Q 中获取每一行最大值的索引，并将其作为NumPy数组返回
-            # Q是模型输出的类别概率分布，q是模型预测的类别标签
             q = Q.detach().data.cpu().numpy().argmax(1)  
-            p = target_distribution(Q.detach()) #依据Q.detach产生的条件，P更新的条件
-            acc_new , nmi_new , ari_new , f1_new = eva(y,q,epoch)
+            acc , nmi , ari , f1 = eva(y, q, epoch)  # 计算当前的性能评估值
+            if acc > prev_acc:  # 如果当前性能评估值优于前一个值
+                p = target_distribution(Q.detach())  # 更新 p
+                prev_acc = acc  # 更新前一个性能评估值
 
-        #计算kl散度
-        kl_loss = F.kl_div(q_nomal.log(), p, reduction='batchmean')
+        A_pred, z, q = model(data, adj, M)
+        
+        # 让每轮训练的结果与每5轮更新一次的P，计算kl散度
+        kl_loss = F.kl_div(q.log(), p, reduction='batchmean')
         re_loss = F.binary_cross_entropy(A_pred.view(-1), adj_label.view(-1))
 
         loss = 10 * kl_loss + re_loss
@@ -110,7 +112,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_epoch', type=int, default=100)
     parser.add_argument('--lr', type=float, default=0.0001)
     parser.add_argument('--n_clusters', default=6, type=int)
-    # parser.add_argument('--update_interval', default=1, type=int)  # [1,3,5]
+    parser.add_argument('--update_interval', default=1, type=int)  # [1,3,5]
     parser.add_argument('--hidden_size', default=256, type=int)
     parser.add_argument('--embedding_size', default=16, type=int)
     parser.add_argument('--weight_decay', type=int, default=5e-3)
