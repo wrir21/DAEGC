@@ -50,7 +50,7 @@ def pretrain(dataset):
                 z.data.cpu().numpy()
             )
             acc, nmi, ari, f1 = eva(y, kmeans.labels_, epoch)
-        if epoch % 3 == 0:
+        if epoch % 2 == 0:
             torch.save(
                 model.state_dict(), f"./pretrain/predaegc_{args.name}_{epoch}.pkl"
             )
