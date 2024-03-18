@@ -78,7 +78,7 @@ def trainer(dataset):
     model.cluster_layer.data = torch.tensor(kmeans.cluster_centers_).to(device) #kmeans.cluster_centers_：K-means算法找到的簇中心点
     eva(y, y_pred, 'pretrain')
 
-    prev_acc = 0  # 初始化前一个性能评估值  
+    max_acc = 0  # 初始化前一个性能评估值  
 
     for epoch in range(args.max_epoch):
         model.train()
@@ -87,7 +87,7 @@ def trainer(dataset):
         acc, nmi, ari, f1 = eva(y, q, epoch)  # 计算当前的性能评估值
         if acc > prev_acc:  # 如果当前性能评估值优于前一个值
             p = target_distribution(Q.detach())  # 更新 p
-            prev_acc = acc  # 更新前一个性能评估值
+            max_acc = acc  # 更新前一个性能评估值
         
         # 让每轮训练的结果与每5轮更新一次的P，计算kl散度
         kl_loss = F.kl_div(Q.log(), p, reduction='batchmean')
