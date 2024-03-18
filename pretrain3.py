@@ -87,6 +87,8 @@ if __name__ == "__main__":
         args.k = None
         args.n_clusters = 6
         args.p = 0.2
+        args.hidden_size = 256
+        args.embedding_size = 24
     elif args.name == "Cora":
         args.lr = 0.02
         args.k = None
