@@ -96,7 +96,7 @@ def trainer(dataset):
         re_loss = F.binary_cross_entropy(A2_pred.view(-1), adj_label.view(-1))
 
         loss = 10 * kl_loss + re_loss
-        loss = loss + 0.01 * torch.sum(abs(A1_pred,A2_pred))
+        loss = loss + 0.01 * torch.sum(torch.abs(A1_pred,A2_pred))
 
         optimizer.zero_grad()
         loss.backward()
