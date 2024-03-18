@@ -125,14 +125,20 @@ if __name__ == "__main__":
       args.lr = 0.0001
       args.k = None
       args.n_clusters = 6
+      args.hidden_size = 256
+      args.embedding_size = 24
     elif args.name == 'Cora':
       args.lr = 0.0001
       args.k = None
       args.n_clusters = 7
+      args.hidden_size = 64
+      args.embedding_size = 16
     elif args.name == "Pubmed":
         args.lr = 0.001
         args.k = None
         args.n_clusters = 3
+        args.hidden_size = 32
+        args.embedding_size = 12
     else:
         args.k = None
     
