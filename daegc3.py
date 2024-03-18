@@ -13,7 +13,7 @@ from torch.optim import Adam
 from torch_geometric.datasets import Planetoid
 
 import utils
-from model import GAT
+from model3 import GAT
 from evaluation import eva
 
 # 自定义的神经网络都需要继承pythorch的nn.Moudle
