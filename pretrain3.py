@@ -65,7 +65,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--name", type=str, default="Citeseer")
     parser.add_argument("--max_epoch", type=int, default=100)
-    parser.add_argument("--p", type=int, default=0.1)
+    parser.add_argument("--p", type=float, default=0.1)
     parser.add_argument("--lr", type=float, default=0.01)
     parser.add_argument("--n_clusters", default=6, type=int)
     parser.add_argument("--hidden_size", default=256, type=int)
