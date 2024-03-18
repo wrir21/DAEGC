@@ -100,6 +100,7 @@ def trainer(dataset):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        epoch += 1
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
