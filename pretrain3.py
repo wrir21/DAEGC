@@ -36,7 +36,7 @@ def pretrain(dataset):
     x = torch.Tensor(dataset.x).to(device)
     y = dataset.y.cpu().numpy()
 
-    for epoch in range(args.max_epoch,args.p):
+    for epoch in range(args.max_epoch):
         model.train()
         A1_pred,A2_pred, z = model(x, adj, M)
         loss = F.binary_cross_entropy(A2_pred.view(-1), adj_label.view(-1))
