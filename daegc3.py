@@ -36,10 +36,10 @@ class DAEGC(nn.Module):
 
 
     def forward(self, x, adj, M):
-        A_pred, z = self.gat(x, adj, M) # （隐式）调用gat模型的forward方法
+        A1_pred,A2_pred,z = self.gat(x, adj, M) # （隐式）调用gat模型的forward方法
         q = self.get_Q(z) #调用本模型（daegc）的get_Q方法
 
-        return A_pred, z, q
+        return A1_pred, A2_pred,z, q
 # Q分布计算
     def get_Q(self, z):
         q = 1.0 / (1.0 + torch.sum(torch.pow(z.unsqueeze(1) - self.cluster_layer, 2), 2) / self.v)
@@ -68,7 +68,7 @@ def trainer(dataset):
     y = dataset.y.cpu().numpy()
 
     with torch.no_grad():
-        _, z = model.gat(data, adj, M)
+        _,_, z = model.gat(data, adj, M)
 
     # get kmeans and pretrain cluster result
     kmeans = KMeans(n_clusters=args.n_clusters, n_init=20)
@@ -85,7 +85,7 @@ def trainer(dataset):
         model.train()
 
         # 计算A、z、P、Q
-        A_pred, z, Q = model(data, adj, M)
+        A1_pred,A2_pred, z, Q = model(data, adj, M)
         q = Q.detach().data.cpu().numpy().argmax(1)  
         acc, nmi, ari, f1 = eva(y, q, epoch)
         if acc >max_acc :
@@ -93,9 +93,10 @@ def trainer(dataset):
            p = target_distribution(Q.detach()) #依据Q.detach产生的条件，P更新的条件仍然成立
         
         kl_loss = F.kl_div(Q.log(), p, reduction='batchmean')
-        re_loss = F.binary_cross_entropy(A_pred.view(-1), adj_label.view(-1))
+        re_loss = F.binary_cross_entropy(A2_pred.view(-1), adj_label.view(-1))
 
         loss = 10 * kl_loss + re_loss
+        loss = loss + 0.01 * torch.sum(abs(A1_pred,A2_pred))
 
         optimizer.zero_grad()
         loss.backward()
@@ -125,15 +126,15 @@ if __name__ == "__main__":
     dataset = datasets[0]
 
     if args.name == 'Citeseer':
-      args.lr = 0.0001
+      args.lr = 0.002
       args.k = None
       args.n_clusters = 6
     elif args.name == 'Cora':
-      args.lr = 0.0001
+      args.lr = 0.05
       args.k = None
       args.n_clusters = 7
     elif args.name == "Pubmed":
-        args.lr = 0.001
+        args.lr = 0.05
         args.k = None
         args.n_clusters = 3
     else:
