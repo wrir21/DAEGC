@@ -88,10 +88,12 @@ if __name__ == "__main__":
         args.hidden_size = 256
         args.embedding_size = 24
     elif args.name == "Cora":
-        args.lr = 0.005
+        args.lr = 0.02
         args.k = None
         args.p = 0.02
         args.n_clusters = 7
+        args.hidden_size = 64
+        args.embedding_size = 12
     elif args.name == "Pubmed":
         args.lr = 0.001
         args.k = None
