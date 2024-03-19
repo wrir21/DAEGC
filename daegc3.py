@@ -79,19 +79,16 @@ def trainer(dataset):
     eva(y, y_pred, 'pretrain')
     
     
-    epoch = args.epoch
-    max_acc = 0
-    while epoch < args.max_epoch:
-        model.train()
+    max_acc = 0  # 初始化前一个性能评估值  
 
-        # 计算A、z、P、Q
+    for epoch in range(args.max_epoch):
+        model.train()
         A1_pred,A2_pred, z, Q = model(data, adj, M)
         q = Q.detach().data.cpu().numpy().argmax(1)  
-        acc, nmi, ari, f1 = eva(y, q, epoch)
-        if acc >max_acc :
-           max_acc = acc 
-           p = target_distribution(Q.detach()) #依据Q.detach产生的条件，P更新的条件仍然成立
-        
+        acc, nmi, ari, f1 = eva(y, q, epoch)  # 计算当前的性能评估值
+        if acc > max_acc:  # 如果当前性能评估值优于前一个值
+            p = target_distribution(Q.detach())  # 更新 p
+            max_acc = acc  # 更新前一个性能评估值
         kl_loss = F.kl_div(Q.log(), p, reduction='batchmean')
         re_loss = F.binary_cross_entropy(A2_pred.view(-1), adj_label.view(-1))
 
@@ -101,7 +98,6 @@ def trainer(dataset):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        epoch += 1
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -129,7 +125,6 @@ if __name__ == "__main__":
       args.lr = 0.002
       args.k = None
       args.n_clusters = 6
-      args.embedding_size = 24
     elif args.name == 'Cora':
       args.lr = 0.05
       args.k = None
