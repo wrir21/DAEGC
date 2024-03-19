@@ -63,7 +63,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--name", type=str, default="Citeseer")
     parser.add_argument("--max_epoch", type=int, default=100)
-    parser.add_argument("--lr", type=float, default=0.02)
+    parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--n_clusters", default=6, type=int)
     parser.add_argument("--hidden_size", default=256, type=int)
     parser.add_argument("--embedding_size", default=16, type=int)
@@ -83,20 +83,14 @@ if __name__ == "__main__":
         args.lr = 0.005
         args.k = None
         args.n_clusters = 6
-        args.hidden_size = 256
-        args.embedding_size = 24
     elif args.name == "Cora":
         args.lr = 0.005
         args.k = None
         args.n_clusters = 7
-        args.hidden_size = 64
-        args.embedding_size = 16
     elif args.name == "Pubmed":
         args.lr = 0.001
         args.k = None
         args.n_clusters = 3
-        args.hidden_size = 32
-        args.embedding_size = 12
     else:
         args.k = None
 
