@@ -92,7 +92,7 @@ def trainer(dataset):
         kl_loss = F.kl_div(Q.log(), p, reduction='batchmean')
         re_loss = F.binary_cross_entropy(A2_pred.view(-1), adj_label.view(-1))
 
-        loss = 10 * kl_loss + re_loss
+        loss = 100 * kl_loss + re_loss
        
 
         optimizer.zero_grad()
