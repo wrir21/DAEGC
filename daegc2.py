@@ -81,11 +81,10 @@ def trainer(dataset):
         model.train()
         # 按照原文逻辑更新P
         if epoch % args.update_interval == 0:
-                # update_interval
-                A1_pred,A2_pred, z, Q = model(data, adj, M)
-                
-                q = Q.detach().data.cpu().numpy().argmax(1)  # Q
-                eva(y, q, epoch)
+            # update_interval
+            A1_pred,A2_pred, z, Q = model(data, adj, M)
+            q = Q.detach().data.cpu().numpy().argmax(1)  # Q
+            eva(y, q, epoch)
 
         A1_pred,A2_pred ,z, q = model(data, adj, M)
         p = target_distribution(Q.detach())
@@ -96,7 +95,7 @@ def trainer(dataset):
         abs_diff_loss = torch.sum(torch.abs(A1_pred - A2_pred))
         loss = 10 * kl_loss + re_loss
         # 计算总损失
-        loss = loss + 0.001 * abs_diff_loss
+        loss = loss + 0.01 * abs_diff_loss
 
         optimizer.zero_grad()
         loss.backward()
