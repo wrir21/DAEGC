@@ -40,7 +40,7 @@ def pretrain(dataset):
         model.train()
         A1_pred , A2_pred, z = model(x, adj, M)
         loss = F.binary_cross_entropy(A2_pred.view(-1), adj_label.view(-1))
-        loss = loss + args.p * torch.sum(torch.abs(A1_pred - A2_pred))
+        loss = loss + args.p * torch.sum(abs(A1_pred - A2_pred))
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
