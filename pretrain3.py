@@ -40,6 +40,7 @@ def pretrain(dataset):
         model.train()
         A1_pred , A2_pred, z = model(x, adj, M)
         loss = F.binary_cross_entropy(A2_pred.view(-1), adj_label.view(-1))
+        loss = loss + args.p * torch.sum(torch.abs(A1_pred - A2_pred))
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -83,13 +84,18 @@ if __name__ == "__main__":
         args.lr = 0.005
         args.k = None
         args.n_clusters = 6
+        args.p = 0.02
+        args.hidden_size = 256
+        args.embedding_size = 24
     elif args.name == "Cora":
         args.lr = 0.005
         args.k = None
+        args.p = 0.02
         args.n_clusters = 7
     elif args.name == "Pubmed":
         args.lr = 0.001
         args.k = None
+        args.p = 0.02
         args.n_clusters = 3
       
         
