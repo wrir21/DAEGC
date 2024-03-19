@@ -129,6 +129,7 @@ if __name__ == "__main__":
       args.lr = 0.002
       args.k = None
       args.n_clusters = 6
+      args.embedding_size = 24
     elif args.name == 'Cora':
       args.lr = 0.05
       args.k = None
