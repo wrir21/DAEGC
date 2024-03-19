@@ -85,7 +85,7 @@ def trainer(dataset):
         A_pred, z, Q = model(data, adj, M)
         q = Q.detach().data.cpu().numpy().argmax(1)  
         acc, nmi, ari, f1 = eva(y, q, epoch)  # 计算当前的性能评估值
-        if acc > prev_acc:  # 如果当前性能评估值优于前一个值
+        if acc > max_acc:  # 如果当前性能评估值优于前一个值
             p = target_distribution(Q.detach())  # 更新 p
             max_acc = acc  # 更新前一个性能评估值
         
@@ -125,20 +125,14 @@ if __name__ == "__main__":
       args.lr = 0.0001
       args.k = None
       args.n_clusters = 6
-      args.hidden_size = 256
-      args.embedding_size = 24
     elif args.name == 'Cora':
       args.lr = 0.0001
       args.k = None
       args.n_clusters = 7
-      args.hidden_size = 64
-      args.embedding_size = 16
     elif args.name == "Pubmed":
         args.lr = 0.001
         args.k = None
         args.n_clusters = 3
-        args.hidden_size = 32
-        args.embedding_size = 12
     else:
         args.k = None
     

@@ -84,11 +84,11 @@ if __name__ == "__main__":
         args.k = None
         args.n_clusters = 6
     elif args.name == "Cora":
-        args.lr = 0.02
+        args.lr = 0.005
         args.k = None
         args.n_clusters = 7
     elif args.name == "Pubmed":
-        args.lr = 0.02
+        args.lr = 0.001
         args.k = None
         args.n_clusters = 3
       
