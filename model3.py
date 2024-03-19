@@ -24,14 +24,15 @@ class GAT(nn.Module):
     def forward(self, x, adj, M):
         # 计算第一层GAT的输出
         h1 = self.conv1(x, adj, M)
+        h1 = F.normalize(h1, p=2, dim=1)
         # 计算第二层GAT的输出
         h2 = self.conv2(h1, adj, M)
-        #对第二层的GAT的输出进行归一化
+        #归一化
         z = F.normalize(h2, p=2, dim=1)
         # 使用解码器计算第一层GAT的重构邻接矩阵 
         A1_pred = self.dot_product_decode(h1)   
         # 使用解码器计算重构邻接矩阵
-        A2_pred = self.dot_product_decode(z)  # 使用A2_pred = self.dot_product_decode(h2)效果不好
+        A2_pred = self.dot_product_decode(z)  
         return A1_pred,A2_pred, z
     
     #解码器
