@@ -131,8 +131,8 @@ if __name__ == "__main__":
       args.lr = 0.05
       args.k = None
       args.n_clusters = 7
-      args.hidden_size = 256
-      args.embedding_size = 24
+      args.hidden_size = 64
+      args.embedding_size = 12
     elif args.name == "Pubmed":
         args.lr = 0.05
         args.k = None
