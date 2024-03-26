@@ -1,0 +1,2 @@
+!python3 pretrain3.py --name Cora --max_epoch 500
+!python3 daegc3.py --name Cora --epoch 148 --max_epoch 500
