@@ -99,6 +99,8 @@ if __name__ == "__main__":
         args.k = None
         args.p = 0.02
         args.n_clusters = 3
+        args.hidden_size = 32
+        args.embedding_size = 12
       
         
     else:
