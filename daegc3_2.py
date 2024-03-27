@@ -137,8 +137,8 @@ if __name__ == "__main__":
         args.lr = 0.05
         args.k = None
         args.n_clusters = 3
-        args.hidden_size = 256
-        args.embedding_size = 24
+        args.hidden_size = 32
+        args.embedding_size = 12
     else:
         args.k = None
     
